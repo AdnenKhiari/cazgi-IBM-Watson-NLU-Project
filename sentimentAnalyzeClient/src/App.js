@@ -43,17 +43,22 @@ class App extends React.Component {
     }
     fetch(url).then((response)=>{
         response.text().then((data)=>{
-        this.setState({sentimentOutput:data});
-        let output = data;
-        if(data === "positive") {
-          output = <div style={{color:"green",fontSize:20}}>{data}</div>
-        } else if (data === "negative"){
-          output = <div style={{color:"red",fontSize:20}}>{data}</div>
+        data = JSON.parse(data)
+        let output = null;
+        if(data.error){
+          output = data.error
+        }else {
+        if(data.label === "positive") {
+          output = <div style={{color:"green",fontSize:20}}>{data.score}</div>
+        } else if (data.label === "negative"){
+          output = <div style={{color:"red",fontSize:20}}>{data.score}</div>
         } else {
-          output = <div style={{color:"orange",fontSize:20}}>{data}</div>
+          output = <div style={{color:"orange",fontSize:20}}>{data.score}</div>
         }
-        this.setState({sentimentOutput:output});
-      })});
+      }
+        this.setState({sentimentOutput: <p>{output} </p>  });
+     
+      })}).catch((err)=> this.setState({sentimentOutput:<p>Error while sending Request !</p>}));
   }
 
   sendForEmotionAnalysis = () => {
@@ -67,8 +72,12 @@ class App extends React.Component {
     }
     fetch(url).then((response)=>{
       response.json().then((data)=>{
-      this.setState({sentimentOutput:<EmotionTable emotions={data}/>});
-  })})  ;
+        if(data.error){
+          this.setState({sentimentOutput: <p> {data.error} </p> });
+        }
+        else
+          this.setState({sentimentOutput:<EmotionTable emotions={data}/>});
+  })}).catch((err)=> this.setState({sentimentOutput: <p>Error while sending Request !</p>}));  
   }
   
 
